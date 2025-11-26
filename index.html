@@ -65,22 +65,64 @@
         }
 
         /* User messages in bubble */
+        /* User messages in bubble on the right */
         .user p {
             background-color: #7B58E5;
             color: #fff;
-            padding: 0.7em 1em;
+            padding: 0.3em 0.1em;
             border-radius: 20px 20px 0 20px;
-            align-self: flex-end;
-            max-width: 70%;
+            max-width: 90%;
             word-wrap: break-word;
+
+            margin-left: auto;
+            /* push bubble to the right */
+            text-align: left;
+            /* keep text starting from left */
         }
 
+
+
         /* AI messages: no bubble, plain text */
+        /* AI messages: plain text, but wrap properly */
         .aibot p {
             color: #000;
             max-width: 100%;
             word-wrap: break-word;
+            white-space: pre-wrap;
+            /* preserves line breaks */
+            overflow-wrap: break-word;
+            /* wraps long words/numbers */
         }
+
+        /* Markdown lists, code blocks, etc. */
+        .aibot p ul,
+        .aibot p ol {
+            padding-left: 1.2em;
+            /* indent lists */
+            margin: 0.5em 0;
+        }
+
+        .aibot p li {
+            margin: 0.3em 0;
+        }
+
+        .aibot p code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .aibot p pre {
+            background-color: #f0f0f0;
+            padding: 0.5em;
+            border-radius: 5px;
+            overflow-x: auto;
+            /* horizontal scroll if code is too long */
+            white-space: pre-wrap;
+            /* wraps long lines */
+        }
+
 
         .chat-form {
             display: flex;
