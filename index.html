@@ -317,29 +317,38 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 <script>
+/* ==============================
+   CONFIG
+=================================*/
 const API_BASE = "https://ej-0-training.hf.space";
 
-/* DOM */
-const messagesContainer = document.getElementById("messages-container");
-const messageForm = document.getElementById("message-form");
-const messageInput = document.getElementById("message-input");
-const whoEl = document.getElementById("who");
+/* ==============
+   DOM ELEMENTS
+=================*/
+const messagesContainer = document.getElementById('messages-container');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
+const micBtn = document.getElementById('mic-btn');
+
+const whoEl = document.getElementById('who');
+
 const tabChat = document.getElementById("tab-chat");
 const tabTools = document.getElementById("tab-tools");
 const chatPage = document.getElementById("chat-page");
 const toolsPanel = document.getElementById("tools-panel");
-const loginPopup = document.getElementById("login-popup");
-const loginBtn = document.getElementById("login-btn");
-const loginUser = document.getElementById("login-user");
-const loginPass = document.getElementById("login-pass");
-const loginError = document.getElementById("login-error");
-const toolsResult = document.getElementById("tools-result");
+
+const loginPopup = document.getElementById('login-popup');
+const loginBtn = document.getElementById('login-btn');
+const loginUser = document.getElementById('login-user');
+const loginPass = document.getElementById('login-pass');
+const loginError = document.getElementById('login-error');
 
 let SESSION_ID = null;
 
-/* TAB SWITCH */
+/* ==============================
+   TAB SWITCHING
+=================================*/
 function switchTab(tab) {
   if (tab === "chat") {
     tabChat.classList.add("active");
@@ -353,10 +362,13 @@ function switchTab(tab) {
     toolsPanel.style.display = "block";
   }
 }
+
 tabChat.onclick = () => switchTab("chat");
 tabTools.onclick = () => switchTab("tools");
 
-/* ADD MESSAGE */
+/* ==============================
+   MESSAGE HELPER
+=================================*/
 function addMessage(text, role) {
   const wrapper = document.createElement("div");
   wrapper.className = "message " + role;
@@ -366,14 +378,12 @@ function addMessage(text, role) {
 
   wrapper.appendChild(bubble);
   messagesContainer.appendChild(wrapper);
-
-  messagesContainer.scrollTo({
-    top: messagesContainer.scrollHeight,
-    behavior: "smooth",
-  });
+  messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
 }
 
-/* LOGIN */
+/* ==============================
+   LOGIN
+=================================*/
 loginBtn.onclick = async () => {
   loginError.innerText = "";
   const username = loginUser.value.trim();
@@ -381,48 +391,46 @@ loginBtn.onclick = async () => {
 
   const res = await fetch(API_BASE + "/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ username, password })
   });
-  const data = await res.json();
 
+  const data = await res.json();
   if (data.success) {
     SESSION_ID = data.session_id;
     loginPopup.style.display = "none";
     whoEl.innerText = `Signed in as: ${SESSION_ID}`;
     addMessage(`Welcome back, ${SESSION_ID}!`, "aibot");
-  } else loginError.innerText = "Invalid login.";
+  } else {
+    loginError.innerText = "Invalid login.";
+  }
 };
 
-/* TYPING ANIMATION */
-function showTyping() {
-  const bubble = document.createElement("div");
-  bubble.className = "message aibot";
-  bubble.id = "typingBubble";
-  bubble.innerHTML = `<div class="typing"></div>`;
-  messagesContainer.appendChild(bubble);
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
-function removeTyping() {
-  const el = document.getElementById("typingBubble");
-  if (el) el.remove();
-}
-
-/* SEND MESSAGE */
+/* ==============================
+   SEND CHAT MESSAGE
+=================================*/
 async function sendMessage(text) {
-  if (!SESSION_ID) return addMessage("Please login first.", "aibot");
+  if (!SESSION_ID) {
+    addMessage("Please login first.", "aibot");
+    return;
+  }
 
   addMessage(text, "user");
-  showTyping();
+
+  const loading = document.createElement("p");
+  loading.className = "loading-text";
+  loading.innerText = "AI is typing...";
+  messagesContainer.appendChild(loading);
 
   const res = await fetch(API_BASE + "/chatbot", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: text, session_id: SESSION_ID }),
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ prompt: text, session_id: SESSION_ID })
   });
+
   const data = await res.json();
 
-  removeTyping();
+  loading.remove();
   addMessage(data.response || "No response", "aibot");
 }
 
@@ -434,16 +442,76 @@ messageForm.addEventListener("submit", e => {
   sendMessage(text);
 });
 
-/* TOOLS — USE LLAMA */
+/* ==============================
+   MIC BUTTON / SPEECH TO TEXT
+=================================*/
+let mediaRecorder = null;
+let audioChunks = [];
+let recording = false;
+
+micBtn.addEventListener("click", async () => {
+  if (!recording) {
+    // Start recording
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert("Your browser does not support microphone recording.");
+      return;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+      const formData = new FormData();
+      formData.append("file", audioBlob, "speech.webm");
+
+      try {
+        const res = await fetch(API_BASE + "/asr", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        const text = data.text;
+
+        messageInput.value = text;
+        await sendMessage(text);
+
+      } catch (err) {
+        console.error(err);
+        addMessage("Error during speech recognition.", "aibot");
+      }
+    };
+
+    mediaRecorder.start();
+    recording = true;
+    micBtn.innerText = "⏹️";   // stop icon
+
+  } else {
+    // Stop recording
+    recording = false;
+    micBtn.innerText = "🎤";
+    mediaRecorder.stop();
+  }
+});
+
+/* ==============================
+   TOOLS (LLAMA)
+=================================*/
 document.getElementById("tools-run").onclick = async () => {
   const text = document.getElementById("tools-text").value.trim();
   const task = document.getElementById("tools-mode").value;
   const extra = document.getElementById("tools-extra").value.trim();
 
-  if (!text) return;
-
-  toolsResult.style.display = "block";
-  toolsResult.innerHTML = "⏳ Processing...";
+  if (!text) {
+    alert("Enter some text.");
+    return;
+  }
 
   const body = { text, task };
   if (task === "translate") body.to = extra || "english";
@@ -451,18 +519,22 @@ document.getElementById("tools-run").onclick = async () => {
 
   const res = await fetch(API_BASE + "/llama", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(body)
   });
 
   const data = await res.json();
 
-  toolsResult.innerHTML = marked.parse(data.result || "No result");
+  // ★ Replace alert with UI box (already added earlier)
+  document.getElementById("tools-result").innerText = data.result;
 };
 
-/* AUTO FOCUS */
+/* ==============================
+   AUTO FOCUS LOGIN FIELD
+=================================*/
 window.onload = () => loginUser.focus();
 </script>
+
 
 </body>
 </html>
