@@ -343,7 +343,8 @@ const loginBtn = document.getElementById('login-btn');
 const loginUser = document.getElementById('login-user');
 const loginPass = document.getElementById('login-pass');
 const loginError = document.getElementById('login-error');
-
+const toolsResult = document.getElementById("tools-result");
+  
 let SESSION_ID = null;
 
 /* ==============================
@@ -405,32 +406,36 @@ loginBtn.onclick = async () => {
     loginError.innerText = "Invalid login.";
   }
 };
-
+/* TYPING ANIMATION */
+function showTyping() {
+  const bubble = document.createElement("div");
+  bubble.className = "message aibot";
+  bubble.id = "typingBubble";
+  bubble.innerHTML = `<div class="typing"></div>`;
+  messagesContainer.appendChild(bubble);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+function removeTyping() {
+  const el = document.getElementById("typingBubble");
+  if (el) el.remove();
+}
 /* ==============================
    SEND CHAT MESSAGE
 =================================*/
 async function sendMessage(text) {
-  if (!SESSION_ID) {
-    addMessage("Please login first.", "aibot");
-    return;
-  }
+  if (!SESSION_ID) return addMessage("Please login first.", "aibot");
 
   addMessage(text, "user");
-
-  const loading = document.createElement("p");
-  loading.className = "loading-text";
-  loading.innerText = "AI is typing...";
-  messagesContainer.appendChild(loading);
+  showTyping();
 
   const res = await fetch(API_BASE + "/chatbot", {
     method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ prompt: text, session_id: SESSION_ID })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: text, session_id: SESSION_ID }),
   });
-
   const data = await res.json();
 
-  loading.remove();
+  removeTyping();
   addMessage(data.response || "No response", "aibot");
 }
 
@@ -512,7 +517,9 @@ document.getElementById("tools-run").onclick = async () => {
     alert("Enter some text.");
     return;
   }
-
+  toolsResult.style.display = "block";
+  toolsResult.innerHTML = "⏳ Processing...";
+  
   const body = { text, task };
   if (task === "translate") body.to = extra || "english";
   if (task === "rewrite") body.style = extra || "normal";
@@ -526,7 +533,9 @@ document.getElementById("tools-run").onclick = async () => {
   const data = await res.json();
 
   // ★ Replace alert with UI box (already added earlier)
-  document.getElementById("tools-result").innerText = data.result;
+  
+  toolsResult.innerHTML = marked.parse(data.result || "No result");
+
 };
 
 /* ==============================
