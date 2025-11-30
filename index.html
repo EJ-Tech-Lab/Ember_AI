@@ -6,46 +6,146 @@
   <title>Chatbot</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background-color: #f7f7f8; display: flex; flex-direction: column; min-height: 100vh; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f8;
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
     main { flex: 1; display: flex; justify-content: center; padding: 1em; }
-    .chatbot { width: 100%; max-width: 700px; display: flex; flex-direction: column; border-radius: 10px; background-color: #ffffff; box-shadow: 0px 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+
+    .chatbot {
+      width: 100%; max-width: 780px;
+      display: flex; flex-direction: column;
+      border-radius: 10px;
+      background-color: #ffffff;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
     .chat-header { padding: 1em; background-color: #7B58E5; color: #fff; }
     .chat-header h1 { margin: 0; font-size: 1.8em; }
-    .chat-messages { flex: 1; padding: 1em; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5em; }
-    .message { display: flex; align-items: flex-start; gap: 0.5em; }
-    .user p { background-color: #7B58E5; color: #fff; padding: 0.3em 0.6em; border-radius: 20px 20px 0 20px; max-width: 90%; word-wrap: break-word; margin-left: auto; text-align: left; }
-    .aibot p { background: #efefef; color: #000; padding: 0.4em 0.6em; border-radius: 20px 20px 20px 0; max-width: 90%; word-wrap: break-word; white-space: pre-wrap; }
-    .chat-form { display: flex; padding: 1em; border-top: 1px solid #ddd; }
-    .chat-form textarea { flex: 1; padding: 0.7em 1em; border-radius: 20px; border: 1px solid #ccc; resize: none; font-size: 1em; }
-    .chat-form button { margin-left: 0.5em; background-color: #7B58E5; color: #fff; border: none; padding: 0.7em 1em; border-radius: 20px; cursor: pointer; }
-    .chat-form button:hover { background-color: #5a3ecf; }
-    .loading-text { font-style: italic; color: #555; }
-    /* Login popup */
-    #login-popup { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-    #login-card { background: white; padding: 20px; border-radius: 10px; width: 320px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-    #login-card h3 { margin-bottom: 8px; }
-    #login-card input { width: 100%; padding: 10px; margin-top: 8px; border-radius: 6px; border: 1px solid #ccc; }
-    #login-card button { margin-top: 12px; width: 100%; padding: 10px; border: none; background: #7B58E5; color: white; border-radius: 6px; cursor: pointer; }
-    #login-error { color: red; margin-top: 10px; min-height: 18px; }
     .meta { font-size: 0.9em; color: #fff; margin-top: 6px; opacity: .9; }
+
+    /* TAB BAR */
+    .tabs {
+      display: flex;
+      background: #eee;
+      border-bottom: 1px solid #ccc;
+    }
+    .tab {
+      flex: 1; text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #ddd;
+      transition: 0.2s;
+    }
+    .tab.active {
+      background: #fff;
+      border-bottom: 3px solid #7B58E5;
+    }
+
+    /* CHAT AREA */
+    .chat-messages {
+      flex: 1; padding: 1em;
+      overflow-y: auto;
+      display: flex; flex-direction: column;
+      gap: 0.5em;
+    }
+    .message { display: flex; align-items: flex-start; gap: 0.5em; }
+    .user p {
+      background-color: #7B58E5; color: #fff;
+      padding: 0.3em 0.6em;
+      border-radius: 20px 20px 0 20px;
+      max-width: 90%; margin-left: auto;
+    }
+    .aibot p {
+      background: #efefef; color: #000;
+      padding: 0.4em 0.6em;
+      border-radius: 20px 20px 20px 0;
+      max-width: 90%; white-space: pre-wrap;
+    }
+    .loading-text { font-style: italic; color: #555; }
+
+    /* FORM */
+    .chat-form {
+      display: flex; padding: 1em;
+      border-top: 1px solid #ddd;
+      gap: 0.5em;
+    }
+    .chat-form textarea {
+      flex: 1; padding: 0.7em 1em;
+      border-radius: 20px; border: 1px solid #ccc;
+      resize: none; font-size: 1em;
+    }
+    .chat-form button {
+      background-color: #7B58E5; color: #fff;
+      border: none; padding: 0.7em 1em;
+      border-radius: 20px; cursor: pointer;
+    }
+    .chat-form button:hover { background-color: #5a3ecf; }
+
+    /* TOOL PANEL */
+    #tools-panel { display: none; padding: 1em; }
+    #tools-panel textarea {
+      width: 100%; height: 150px;
+      padding: 10px; border-radius: 8px; border: 1px solid #ccc;
+    }
+    #tools-panel select, #tools-panel input {
+      padding: 8px; margin-top: 8px; width: 100%;
+      border-radius: 6px; border: 1px solid #aaa;
+    }
+    #tools-panel button {
+      margin-top: 12px; width: 100%;
+      padding: 10px; border: none;
+      background: #7B58E5; color: white;
+      border-radius: 6px; cursor: pointer;
+    }
+
+    /* LOGIN POPUP */
+    #login-popup {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.5);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 2000;
+    }
+    #login-card {
+      background: white; padding: 20px; border-radius: 10px;
+      width: 320px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
-  <!-- LOGIN POPUP -->
-  <div id="login-popup">
-    <div id="login-card">
-      <h3>Sign in</h3>
-      <input id="login-user" placeholder="username" />
-      <input id="login-pass" placeholder="password" type="password" />
-      <button id="login-btn">Login</button>
-      <p id="login-error"></p>
-      
-    </div>
-  </div>
 
-  <main>
-    <div class="chatbot">
-      <div class="chat-header"><h1>Pea🫛</h1><div class="meta" id="who"></div></div>
+<!-- LOGIN POPUP -->
+<div id="login-popup">
+  <div id="login-card">
+    <h3>Sign in</h3>
+    <input id="login-user" placeholder="username" />
+    <input id="login-pass" type="password" placeholder="password" />
+    <button id="login-btn">Login</button>
+    <p id="login-error" style="color:red"></p>
+  </div>
+</div>
+
+<main>
+  <div class="chatbot">
+
+    <div class="chat-header">
+      <h1>Pea🫛</h1>
+      <div class="meta" id="who"></div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" id="tab-chat">💬 Chat</div>
+      <div class="tab" id="tab-tools">🛠️ Tools</div>
+    </div>
+
+    <!-- CHAT PAGE -->
+    <div id="chat-page">
       <div class="chat-messages" id="messages-container"></div>
 
       <form class="chat-form" id="message-form">
@@ -54,169 +154,177 @@
         <button type="submit">➤</button>
       </form>
     </div>
-  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script>
-    // ---- CONFIG: change this to your backend base URL ----
-    const API_BASE = "https://ej-0-training.hf.space"; // or "http://localhost:8000"
-    // ----------------------------------------------------
+    <!-- TOOLS PAGE -->
+    <div id="tools-panel">
+      <textarea id="tools-text" placeholder="Enter text for summary / translation / rewrite..."></textarea>
 
-    const messagesContainer = document.getElementById('messages-container');
-    const messageForm = document.getElementById('message-form');
-    const messageInput = document.getElementById('message-input');
-    const micBtn = document.getElementById('mic-btn');
+      <select id="tools-mode">
+        <option value="summarize">Summarize</option>
+        <option value="translate">Translate</option>
+        <option value="rewrite">Rewrite</option>
+      </select>
 
-    const loginPopup = document.getElementById('login-popup');
-    const loginBtn = document.getElementById('login-btn');
-    const loginUser = document.getElementById('login-user');
-    const loginPass = document.getElementById('login-pass');
-    const loginError = document.getElementById('login-error');
-    const whoEl = document.getElementById('who');
+      <input id="tools-extra" placeholder="Target language or style (optional)" />
 
-    let SESSION_ID = null;
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let recording = false;
+      <button id="tools-run">Run with LLaMA</button>
+    </div>
 
-    // Resize textarea auto
-    messageInput.addEventListener('input', e => {
-      e.target.style.height = 'auto';
-      e.target.style.height = e.target.scrollHeight + 'px';
-    });
+  </div>
+</main>
 
-    const addMessage = (message, role) => {
-      const messageElement = document.createElement('div');
-      messageElement.className = `message ${role}`;
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+/* ==============================
+   CONFIG
+=================================*/
+const API_BASE = "https://ej-0-training.hf.space";
 
-      const bubble = document.createElement('p');
-      bubble.innerHTML = marked.parse(message);
+/* ==============
+   DOM ELEMENTS
+=================*/
+const messagesContainer = document.getElementById('messages-container');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
+const whoEl = document.getElementById('who');
 
-      messageElement.appendChild(bubble);
-      messagesContainer.appendChild(messageElement);
-      messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
-    };
+const tabChat = document.getElementById("tab-chat");
+const tabTools = document.getElementById("tab-tools");
+const chatPage = document.getElementById("chat-page");
+const toolsPanel = document.getElementById("tools-panel");
 
-    // LOGIN
-    loginBtn.onclick = async () => {
-      loginError.innerText = "";
-      const username = loginUser.value.trim();
-      const password = loginPass.value.trim();
-      if (!username || !password) {
-        loginError.innerText = "Enter both username and password.";
-        return;
-      }
+const loginPopup = document.getElementById('login-popup');
+const loginBtn = document.getElementById('login-btn');
+const loginUser = document.getElementById('login-user');
+const loginPass = document.getElementById('login-pass');
+const loginError = document.getElementById('login-error');
 
-      try {
-        const res = await fetch(API_BASE + "/login", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (data.success) {
-          SESSION_ID = data.session_id;
-          loginPopup.style.display = "none";
-          whoEl.innerText = `Signed in as: ${SESSION_ID}`;
-          addMessage(`Welcome back, ${SESSION_ID}!`, 'aibot');
-        } else {
-          loginError.innerText = "Invalid username or password.";
-        }
-      } catch (err) {
-        loginError.innerText = "Network or server error.";
-        console.error(err);
-      }
-    };
+let SESSION_ID = null;
 
-    // SEND MESSAGE (with session_id)
-    const sendMessage = async (message) => {
-      if (!SESSION_ID) {
-        addMessage("Please login first.", "aibot");
-        return;
-      }
+/* ==============================
+   TAB SWITCHING
+=================================*/
+function switchTab(tab) {
+  if (tab === "chat") {
+    tabChat.classList.add("active");
+    tabTools.classList.remove("active");
+    chatPage.style.display = "block";
+    toolsPanel.style.display = "none";
+  } else {
+    tabTools.classList.add("active");
+    tabChat.classList.remove("active");
+    chatPage.style.display = "none";
+    toolsPanel.style.display = "block";
+  }
+}
+tabChat.onclick = () => switchTab("chat");
+tabTools.onclick = () => switchTab("tools");
 
-      addMessage(message, 'user');
+/* ==============================
+   MESSAGE HELPER
+=================================*/
+function addMessage(text, role) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "message " + role;
 
-      const loading = document.createElement('p');
-      loading.className = 'loading-text';
-      loading.innerText = 'AI is typing...';
-      messagesContainer.appendChild(loading);
+  const bubble = document.createElement("p");
+  bubble.innerHTML = marked.parse(text);
 
-      try {
-        const response = await fetch(API_BASE + '/chatbot', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ prompt: message, session_id: SESSION_ID })
-        });
+  wrapper.appendChild(bubble);
+  messagesContainer.appendChild(wrapper);
+  messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
+}
 
-        const data = await response.json();
-        loading.remove();
-        addMessage(data.response || "No response", 'aibot');
+/* ==============================
+   LOGIN
+=================================*/
+loginBtn.onclick = async () => {
+  loginError.innerText = "";
+  const username = loginUser.value.trim();
+  const password = loginPass.value.trim();
 
-      } catch (error) {
-        loading.remove();
-        addMessage(`Error: ${error}`, 'aibot');
-      }
-    };
+  const res = await fetch(API_BASE + "/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
 
-    messageForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const message = messageInput.value.trim();
-      if (!message) return;
-      messageInput.value = '';
-      await sendMessage(message);
-    });
+  if (data.success) {
+    SESSION_ID = data.session_id;
+    loginPopup.style.display = "none";
+    whoEl.innerText = `Signed in as: ${SESSION_ID}`;
+    addMessage(`Welcome back, ${SESSION_ID}!`, "aibot");
+  } else loginError.innerText = "Invalid login.";
+};
 
-    // MICROPHONE (ASR)
-    micBtn.addEventListener('click', async () => {
-      if (!recording) {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          alert("Microphone not supported.");
-          return;
-        }
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-        } catch (err) {
-          console.error(err);
-          addMessage("Microphone error.", "aibot");
-          return;
-        }
+/* ==============================
+   SEND MESSAGE → main GPT model
+=================================*/
+async function sendMessage(text) {
+  if (!SESSION_ID) {
+    addMessage("Please login first.", "aibot");
+    return;
+  }
 
-        audioChunks = [];
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append('file', audioBlob, 'speech.webm');
+  addMessage(text, "user");
 
-          try {
-            const res = await fetch(API_BASE + '/asr', {
-              method: 'POST',
-              body: formData
-            });
-            const data = await res.json();
-            const text = data.text || "";
-            messageInput.value = text;
-            await sendMessage(text);
-          } catch (err) {
-            console.error(err);
-            addMessage("Error recognizing speech.", 'aibot');
-          }
-        };
+  const loading = document.createElement("p");
+  loading.className = "loading-text";
+  loading.innerText = "AI is typing...";
+  messagesContainer.appendChild(loading);
 
-        mediaRecorder.start();
-        micBtn.innerText = "⏹️";
-        recording = true;
-      } else {
-        mediaRecorder.stop();
-        micBtn.innerText = "🎤";
-        recording = false;
-      }
-    });
+  const res = await fetch(API_BASE + "/chatbot", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ prompt: text, session_id: SESSION_ID })
+  });
+  const data = await res.json();
 
-    // OPTIONAL: focus username input on load
-    window.onload = () => loginUser.focus();
-  </script>
+  loading.remove();
+  addMessage(data.response || "No response", "aibot");
+}
+
+messageForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const text = messageInput.value.trim();
+  if (!text) return;
+  messageInput.value = "";
+  sendMessage(text);
+});
+
+/* ==============================
+   TOOLS → llama model
+=================================*/
+document.getElementById("tools-run").onclick = async () => {
+  const text = document.getElementById("tools-text").value.trim();
+  const task = document.getElementById("tools-mode").value;
+  const extra = document.getElementById("tools-extra").value.trim();
+
+  if (!text) {
+    alert("Enter some text.");
+    return;
+  }
+
+  const body = { text, task };
+  if (task === "translate") body.to = extra || "english";
+  if (task === "rewrite") body.style = extra || "normal";
+
+  const res = await fetch(API_BASE + "/llama", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  alert("Result:\n\n" + data.result);
+};
+
+/* ==============================
+   AUTO FOCUS LOGIN FIELD
+=================================*/
+window.onload = () => loginUser.focus();
+</script>
+
 </body>
 </html>
