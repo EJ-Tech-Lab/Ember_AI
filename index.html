@@ -221,6 +221,8 @@
             <div class="chat-header">
                 <h1>Pea 🫛</h1>
                 <div class="meta" id="who"></div>
+              <button id="logout-btn">Logout</button>
+
             </div>
 
             <div id="chat-page">
@@ -271,7 +273,21 @@ function addMessage(text, role) {
     messagesContainer.appendChild(wrapper);
     messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
 }
+//=============================================
+document.getElementById("logout-btn").onclick = async () => {
+    await fetch(API_BASE + "/logout", {
+        method: "POST",
+        credentials: "include"
+    });
 
+    ACCESS_TOKEN = null;
+    CURRENT_USERNAME = null;
+
+    whoEl.innerText = "Not signed in";
+    loginPopup.style.display = "flex";
+
+    addMessage("You have been logged out.", "aibot");
+};
 /* ============================== LOGIN / SIGNUP SWITCH ============================== */
 switchMode.onclick = () => {
     isSignupMode = !isSignupMode;
