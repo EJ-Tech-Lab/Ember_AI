@@ -348,7 +348,7 @@ loginBtn.onclick = async () => {
     }
 
     // LOGIN (JWT + HttpOnly refresh cookie)
-    const res = await fetch(API_BASE + "/auth/login", {
+    const res = await fetch(API_BASE + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
