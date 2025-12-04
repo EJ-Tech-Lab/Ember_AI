@@ -595,7 +595,7 @@ fileInput.addEventListener("change", async () => {
     showTyping();
 
     try {
-        const res = await fetch(API_BASE + "/upload_files", {
+        const res = await fetch(API_BASE + "/upload_document", {
             method: "POST",
             headers: { "Authorization": "Bearer " + ACCESS_TOKEN },
             body: formData
