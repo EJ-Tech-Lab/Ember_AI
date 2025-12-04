@@ -575,6 +575,8 @@ window.onload = async () => {
     }
 };
 
+/* ============================== FILE UPLOAD ============================== */
+
 fileBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", async () => {
@@ -583,15 +585,13 @@ fileInput.addEventListener("change", async () => {
         return;
     }
 
-    const files = fileInput.files;
-    if (!files || files.length === 0) return;
+    const file = fileInput.files[0];
+    if (!file) return;
 
     const formData = new FormData();
-    for (let f of files) {
-        formData.append("files", f);
-    }
+    formData.append("file", file);
 
-    addMessage(`Uploading ${files.length} file(s)...`, "user");
+    addMessage(`Uploading ${file.name}...`, "user");
     showTyping();
 
     try {
@@ -610,15 +610,19 @@ fileInput.addEventListener("change", async () => {
             return;
         }
 
-        addMessage(data.message || "Files uploaded successfully.", "aibot");
+        addMessage(
+            `Uploaded **${file.name}**\nDocument ID: ${data.doc_id}\nChunks: ${data.num_chunks}`,
+            "aibot"
+        );
     } catch (err) {
         removeTyping();
         addMessage("Upload error.", "aibot");
         console.error(err);
     }
 
-    fileInput.value = ""; // clear selection
+    fileInput.value = "";
 });
+
 
 </script>
 </body>
