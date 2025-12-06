@@ -271,7 +271,9 @@
         messagesContainer.appendChild(wrapper);
         messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
     }
-
+function addMessagesFromHistory(messages) {
+    messages.forEach(m => addMessage(m.content, m.role === "user" ? "user" : "aibot"));
+}
     /* =================== LOGOUT =================== */
     logoutBtn.onclick = async () => {
         try {
@@ -293,6 +295,7 @@
         CURRENT_EMAIL = null;
         whoEl.innerText = "Not signed in";
         loginPopup.style.display = "flex";
+      messagesContainer.innerHTML = "";
         addMessage("You have been logged out.", "aibot");
     };
 
@@ -370,9 +373,15 @@
         REFRESH_TOKEN = data.refresh_token;
         CURRENT_EMAIL = email;
 
-        loginPopup.style.display = "none";
-        whoEl.innerText = `Signed in as: ${CURRENT_EMAIL}`;
-        addMessage(`Welcome back, ${CURRENT_EMAIL}!`, "aibot");
+         loginPopup.style.display = "none";
+    whoEl.innerText = `Signed in as: ${CURRENT_EMAIL}`;
+    messagesContainer.innerHTML = "";
+
+    // Load summary & recent messages
+    if (data.summary) addMessage(`**Summary of previous chats:**\n${data.summary}`, "aibot");
+    if (data.recent_messages) addMessagesFromHistory(data.recent_messages);
+
+    addMessage(`Welcome back, ${CURRENT_EMAIL}!`, "aibot");
     };
 
     async function refreshAccessToken() {
@@ -410,47 +419,45 @@
     function removeTyping() { const el = document.getElementById("typingBubble"); if(el) el.remove(); }
 
     async function sendMessage(text) {
-        if (!ACCESS_TOKEN) return addMessage("Please login first.", "aibot");
-        addMessage(text, "user");
-        showTyping();
+    if (!ACCESS_TOKEN) return addMessage("Please login first.", "aibot");
+    addMessage(text, "user");
+    showTyping();
 
-        let res;
-        try {
-            res = await fetch(API_BASE + "/chatbot", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + ACCESS_TOKEN
-                },
-                body: JSON.stringify({ prompt: text })
-            });
-        } catch (err) {
-            removeTyping();
-            addMessage("Network error.", "aibot");
-            return;
-        }
-
-        if (res.status === 401) {
-            const refreshed = await refreshAccessToken();
-            if (refreshed) return sendMessage(text);
-            removeTyping();
-            addMessage("Session expired. Please login again.", "aibot");
-            loginPopup.style.display = "flex";
-            return;
-        }
-
-        const data = await res.json();
+    let res;
+    try {
+        res = await fetch(API_BASE + "/chatbot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ACCESS_TOKEN },
+            body: JSON.stringify({ prompt: text })
+        });
+    } catch (err) {
         removeTyping();
-        addMessage(data.response || "No response", "aibot");
+        addMessage("Network error.", "aibot");
+        return;
     }
 
-    messageForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const text = messageInput.value.trim();
-        if (!text) return;
-        messageInput.value = "";
-        sendMessage(text);
-    });
+    if (res.status === 401) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) return sendMessage(text);
+        removeTyping();
+        addMessage("Session expired. Please login again.", "aibot");
+        loginPopup.style.display = "flex";
+        return;
+    }
+
+    const data = await res.json();
+    removeTyping();
+    addMessage(data.response || "No response", "aibot");
+}
+
+messageForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const text = messageInput.value.trim();
+    if (!text) return;
+    messageInput.value = "";
+    sendMessage(text);
+});
+
 
     /* =================== FILE UPLOAD =================== */
     fileBtn.addEventListener("click", () => fileInput.click());
