@@ -476,6 +476,45 @@
         }
         fileInput.value = "";
     });
+//======================================================
+  let mediaRecorder = null;
+        let audioChunks = [];
+        let recording = false;
+
+        micBtn.addEventListener("click", async () => {
+            if (!recording) {
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    alert("Your browser does not support microphone recording.");
+                    return;
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                    const formData = new FormData();
+                    formData.append("file", audioBlob, "speech.webm");
+                    try {
+                        const res = await fetch(API_BASE + "/asr", { method: "POST", body: formData });
+                        const data = await res.json();
+                        const text = data.text;
+                        messageInput.value = text;
+                        await sendMessage(text);
+                    } catch (err) {
+                        console.error(err);
+                        addMessage("Error during speech recognition.", "aibot");
+                    }
+                };
+                mediaRecorder.start();
+                recording = true;
+                micBtn.innerText = "⏹️";
+            } else {
+                recording = false;
+                micBtn.innerText = "🎤";
+                mediaRecorder.stop();
+            }
+        });
 
     /* =================== AUTO-REFRESH =================== */
     setInterval(() => { if (ACCESS_TOKEN) refreshAccessToken(); }, 10*60*1000);
