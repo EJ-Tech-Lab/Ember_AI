@@ -262,15 +262,23 @@
     let isSignupMode = false;
 
     /* =================== MESSAGES =================== */
-    function addMessage(text, role) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "message " + role;
-        const bubble = document.createElement("p");
-        bubble.innerHTML = marked.parse(text);
-        wrapper.appendChild(bubble);
-        messagesContainer.appendChild(wrapper);
-        messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
-    }
+    // Modified to return the content div so we can update it during streaming
+        function addMessage(text, role) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "message " + role;
+            
+            const bubble = document.createElement("div"); // Changed from p to div for block elements
+            bubble.innerHTML = marked.parse(text);
+            
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            scrollToBottom();
+            return bubble; // Return the DOM element to update later
+        }
+
+        function scrollToBottom() {
+            messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
+        }
 function addMessagesFromHistory(messages) {
     messages.forEach(m => addMessage(m.content, m.role === "user" ? "user" : "aibot"));
 }
