@@ -5,719 +5,593 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pea Chat</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         /* =====================================
-           GLOBAL / RESET
-        ======================================*/
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+       GLOBAL / RESET
+    ======================================*/
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: "Inter", "Segoe UI", sans-serif;
+            font-family: "Inter", Arial, sans-serif;
             background: linear-gradient(135deg, #8b5cf6, #4f46e5);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
             padding: 20px;
-            color: #333;
         }
 
         /* =====================================
-           MAIN LAYOUT (SIDEBAR + CHAT)
-        ======================================*/
-        .app-container {
+       MAIN CHAT WRAPPER
+    ======================================*/
+        .chatbot {
             width: 100%;
-            max-width: 1100px;
-            height: 90vh;
+            max-width: 780px;
             display: flex;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
+            flex-direction: column;
             border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
-            position: relative;
+            animation: fadeIn 0.6s ease both;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 280px;
-            background: rgba(245, 245, 250, 0.9);
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .sidebar-header {
-            padding-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand { font-size: 1.4em; font-weight: bold; color: #7B58E5; }
-
-        .new-chat-btn {
-            background: #7B58E5;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            width: 100%;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
-            margin-bottom: 10px;
-        }
-
-        .new-chat-btn:hover { background: #633ad9; }
-
-        .thread-list {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .thread-item {
-            padding: 10px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9em;
-            color: #555;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.2s;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .thread-item span {
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .thread-item:hover { background: #e0e7ff; color: #7B58E5; }
-        .thread-item.active { background: #7B58E5; color: white; }
-
-        .delete-thread {
-            opacity: 0;
-            background: transparent;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            padding: 4px;
-        }
-        .thread-item:hover .delete-thread { opacity: 1; }
-
-        /* USER PROFILE (BOTTOM OF SIDEBAR) */
-        .user-profile {
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-            font-size: 0.85em;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .logout-link { color: #d946ef; cursor: pointer; text-decoration: underline; }
-
-        /* MAIN CHAT AREA */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-        }
-
+        /* =====================================
+       HEADER
+    ======================================*/
         .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
+            padding: 1.3em;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(6px);
+            color: #0f0;
+            text-align: center;
             font-weight: bold;
-            color: #333;
-            display: flex;
-            justify-content: space-between;
         }
 
+        .chat-header h1 {
+            font-size: 2em;
+        }
+
+        .meta {
+            font-size: .9em;
+            opacity: .9;
+        }
+
+        /* =====================================
+       CHAT AREA
+    ======================================*/
         .chat-messages {
             flex: 1;
+            height: 500px;
             overflow-y: auto;
-            padding: 20px;
+            padding: 1em;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            scroll-behavior: smooth;
+            gap: 0.8em;
         }
 
-        /* MESSAGES */
-        .message { display: flex; align-items: flex-start; gap: 10px; max-width: 80%; animation: fadeIn 0.3s ease; }
-        .message.user { margin-left: auto; flex-direction: row-reverse; }
-        
-        .bubble {
-            padding: 12px 16px;
-            border-radius: 18px;
-            line-height: 1.5;
-            font-size: 0.95em;
-            word-wrap: break-word;
-        }
-
-        .message.user .bubble {
-            background: #7B58E5;
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.aibot .bubble {
-            background: #f3f4f6;
-            color: #1f2937;
-            border-bottom-left-radius: 4px;
-        }
-
-        /* CHAT INPUT */
-        .chat-input-area {
-            padding: 20px;
-            background: #fff;
-            border-top: 1px solid #eee;
-        }
-
-        .input-wrapper {
+        .message {
             display: flex;
-            gap: 10px;
-            background: #f9fafb;
-            padding: 10px;
-            border-radius: 15px;
-            border: 1px solid #e5e7eb;
-            align-items: flex-end;
+            align-items: flex-start;
+            gap: 0.7em;
+            animation: fadeIn 0.3s ease;
         }
 
-        textarea {
+        .user p {
+            background-color: #7B58E5;
+            color: #fff;
+            padding: 0.6em 1em;
+            border-radius: 18px 18px 0 18px;
+            max-width: 85%;
+            margin-left: auto;
+            white-space: pre-wrap;
+        }
+
+        .aibot p {
+            background-color: #ececec;
+            color: #000;
+            padding: 0.6em 1em;
+            border-radius: 18px 18px 18px 0;
+            max-width: 85%;
+            white-space: pre-wrap;
+        }
+
+        /* Typing animation */
+        .typing {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 4px;
+            background: #666;
+            animation: blink 1s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: .2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: .2;
+            }
+        }
+
+        /* =====================================
+       MESSAGE FORM
+    ======================================*/
+        .chat-form {
+            display: flex;
+            padding: 1em;
+            border-top: 1px solid #ddd;
+            gap: 0.5em;
+            background: #fafafa;
+        }
+
+        .chat-form textarea {
             flex: 1;
-            border: none;
-            background: transparent;
+            padding: 0.8em 1em;
+            border-radius: 18px;
+            border: 1px solid #ddd;
             resize: none;
-            padding: 8px;
-            font-family: inherit;
-            outline: none;
+            font-size: 1em;
+            min-height: 45px;
             max-height: 100px;
         }
 
-        .icon-btn {
-            background: none;
+        .chat-form button {
+            background-color: #7B58E5;
+            color: #fff;
             border: none;
-            color: #6b7280;
+            padding: 0 18px;
+            border-radius: 18px;
             cursor: pointer;
-            padding: 8px;
             transition: 0.2s;
             font-size: 1.1em;
         }
-        .icon-btn:hover { color: #7B58E5; }
 
-        .send-btn {
+        .chat-form button:hover {
+            background-color: #633ad9;
+        }
+
+        /* =====================================
+       LOGIN POPUP
+    ======================================*/
+        #login-popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #login-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 320px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            animation: fadeIn 0.5s;
+        }
+
+        #login-card input {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        #login-card button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 16px;
             background: #7B58E5;
             color: white;
             border: none;
             border-radius: 10px;
-            width: 40px;
-            height: 40px;
+            font-size: 1.05em;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        .send-btn:hover { background: #633ad9; }
 
-        /* =====================================
-           LOGIN POPUP
-        ======================================*/
-        #login-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-        .login-card {
-            background: white; padding: 30px;
-            border-radius: 16px; width: 350px;
+        #switch-mode {
+            margin-top: 10px;
+            color: #7B58E5;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9em;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .login-card input {
-            width: 100%; padding: 12px; margin: 10px 0;
-            border: 1px solid #ddd; border-radius: 8px;
-        }
-        .login-card button {
-            width: 100%; padding: 12px;
-            background: #7B58E5; color: white;
-            border: none; border-radius: 8px;
-            cursor: pointer; font-weight: bold;
-        }
-        .switch-mode {
-            margin-top: 15px; font-size: 0.9em;
-            color: #7B58E5; cursor: pointer; text-decoration: underline;
-        }
-
-        /* UTILS */
-        .hidden { display: none !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .app-container { flex-direction: column; height: 100vh; border-radius: 0; }
-            .sidebar { width: 100%; height: 60px; flex-direction: row; padding: 5px; overflow-x: auto; overflow-y: hidden; }
-            .new-chat-btn { width: auto; margin: 0; }
-            .thread-list { flex-direction: row; }
-            .thread-item { width: 150px; }
-            .user-profile { display: none; } /* Hide profile on mobile for space */
         }
     </style>
 </head>
 
 <body>
+    <!-- LOGIN POPUP -->
+    <div id="login-popup">
+        <div id="login-card">
+            <h3 id="login-title">Sign in</h3>
 
-    <div id="login-overlay">
-        <div class="login-card">
-            <h2 id="auth-title">Welcome</h2>
-            <p id="auth-error" style="color:red; font-size: 0.9em; margin-bottom: 5px;"></p>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Password">
-            <button id="auth-btn">Sign In</button>
-            <div class="switch-mode" id="toggle-auth">Need an account? Sign Up</div>
+            <input id="login-email" type="email" placeholder="Email" />
+            <input id="login-pass" type="password" placeholder="Password" />
+            <input id="login-pass2" type="password" placeholder="Confirm password" style="display:none;" />
+
+            <button id="login-btn">Login</button>
+            <p id="login-error" style="color:red"></p>
+            <div id="switch-mode">Don't have an account? Sign up</div>
         </div>
     </div>
 
-    <div class="app-container">
-        
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="brand">Pea 🫛</div>
-            </div>
-            
-            <button class="new-chat-btn" id="new-chat-btn">
-                <i class="fas fa-plus"></i> New Chat
-            </button>
-
-            <div class="thread-list" id="thread-list">
-                </div>
-
-            <div class="user-profile">
-                <div id="user-email-display" style="font-weight: bold;"></div>
-                <div class="logout-link" id="logout-btn">Log out</div>
-            </div>
-        </aside>
-
-        <main class="chat-area">
+    <main>
+        <div class="chatbot">
             <div class="chat-header">
-                <span id="current-chat-title">New Chat</span>
-                <span id="connection-status" style="font-size: 0.8em; color: green;">● Online</span>
+                <h1>Pea 🫛</h1>
+                <div class="meta" id="who">Not signed in</div>
+                <button id="logout-btn">Logout</button>
             </div>
 
-            <div class="chat-messages" id="messages-container">
-                <div style="text-align:center; color:#aaa; margin-top: 50px;">
-                    <i class="fas fa-robot" style="font-size: 3em; margin-bottom: 10px;"></i>
-                    <p>Select a conversation or start a new one.</p>
-                </div>
+            <div id="chat-page">
+                <div class="chat-messages" id="messages-container"></div>
+                <form class="chat-form" id="message-form">
+                    <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                    <button type="button" id="file-btn">📎</button>
+                    <input type="file" id="file-input" style="display:none;" multiple />
+                    <button type="button" id="mic-btn">🎤</button>
+                    <button type="submit">➤</button>
+                </form>
             </div>
+        </div>
+    </main>
 
-            <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <button class="icon-btn" id="file-btn"><i class="fas fa-paperclip"></i></button>
-                    <input type="file" id="file-input" class="hidden">
-                    
-                    <button class="icon-btn" id="mic-btn"><i class="fas fa-microphone"></i></button>
-                    
-                    <textarea id="message-input" rows="1" placeholder="Type a message..."></textarea>
-                    
-                    <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </main>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // CONFIG
-        const API_BASE = "https://ej-0-training.hf.space"; 
+        /* ============================== CONFIG ============================== */
+        const API_BASE = "https://ej-0-training.hf.space";
 
-        // STATE
-        let accessToken = localStorage.getItem("access_token");
-        let refreshToken = localStorage.getItem("refresh_token");
-        let currentEmail = localStorage.getItem("user_email");
-        let currentThreadId = null;
-        let isSignup = false;
+        /* =================== DOM ELEMENTS =================== */
+        const messagesContainer = document.getElementById('messages-container');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const micBtn = document.getElementById('mic-btn');
+        const whoEl = document.getElementById('who');
 
-        // DOM ELEMENTS
-        const els = {
-            overlay: document.getElementById('login-overlay'),
-            authBtn: document.getElementById('auth-btn'),
-            toggleAuth: document.getElementById('toggle-auth'),
-            emailIn: document.getElementById('email'),
-            passIn: document.getElementById('password'),
-            err: document.getElementById('auth-error'),
-            title: document.getElementById('auth-title'),
-            
-            threadList: document.getElementById('thread-list'),
-            newChatBtn: document.getElementById('new-chat-btn'),
-            msgContainer: document.getElementById('messages-container'),
-            msgInput: document.getElementById('message-input'),
-            sendBtn: document.getElementById('send-btn'),
-            fileBtn: document.getElementById('file-btn'),
-            fileIn: document.getElementById('file-input'),
-            micBtn: document.getElementById('mic-btn'),
-            
-            chatTitle: document.getElementById('current-chat-title'),
-            userDisplay: document.getElementById('user-email-display'),
-            logoutBtn: document.getElementById('logout-btn')
+        const loginPopup = document.getElementById('login-popup');
+        const loginBtn = document.getElementById('login-btn');
+        const loginEmail = document.getElementById('login-email');
+        const loginPass = document.getElementById('login-pass');
+        const loginPass2 = document.getElementById('login-pass2');
+        const loginTitle = document.getElementById('login-title');
+        const loginError = document.getElementById('login-error');
+        const switchMode = document.getElementById('switch-mode');
+        const logoutBtn = document.getElementById('logout-btn');
+        const fileBtn = document.getElementById("file-btn");
+        const fileInput = document.getElementById("file-input");
+
+        let ACCESS_TOKEN = null;
+        let REFRESH_TOKEN = null;
+        let CURRENT_EMAIL = null;
+        let isSignupMode = false;
+
+        /* =================== MESSAGES =================== */
+        /* =================== MESSAGES (UPDATED) =================== */
+        // Returns the bubble element so we can update it during streaming
+        function addMessage(text, role) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "message " + role;
+
+            const bubble = document.createElement("p");
+            // Only parse if text exists, otherwise empty for streaming start
+            bubble.innerHTML = text ? marked.parse(text) : '<span class="typing-cursor"></span>';
+
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
+
+            return bubble; // <--- RETURN THE DOM ELEMENT
+        }
+
+        function addMessagesFromHistory(messages) {
+            messages.forEach(m => addMessage(m.content, m.role === "user" ? "user" : "aibot"));
+        }
+        /* =================== LOGOUT =================== */
+        logoutBtn.onclick = async () => {
+            try {
+                await fetch(API_BASE + "/logout", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Authorization": "Bearer " + ACCESS_TOKEN,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ refresh_token: REFRESH_TOKEN })
+                });
+            } catch (e) {
+                console.warn("Logout failed:", e);
+            }
+
+            ACCESS_TOKEN = null;
+            REFRESH_TOKEN = null;
+            CURRENT_EMAIL = null;
+            whoEl.innerText = "Not signed in";
+            loginPopup.style.display = "flex";
+            messagesContainer.innerHTML = "";
+            addMessage("You have been logged out.", "aibot");
         };
 
-        /* ============================================================
-           INITIALIZATION
-        ============================================================ */
-        async function init() {
-            if (accessToken && await refreshSession()) {
-                showApp();
+        /* =================== SWITCH LOGIN / SIGNUP =================== */
+        switchMode.onclick = () => {
+            isSignupMode = !isSignupMode;
+            if (isSignupMode) {
+                loginTitle.innerText = "Sign up";
+                loginBtn.innerText = "Create Account";
+                switchMode.innerText = "Already have an account? Sign in";
+                loginPass2.style.display = "block";
             } else {
-                showLogin();
+                loginTitle.innerText = "Sign in";
+                loginBtn.innerText = "Login";
+                switchMode.innerText = "Don't have an account? Sign up";
+                loginPass2.style.display = "none";
             }
-        }
-        window.onload = init;
+            loginError.innerText = "";
+        };
 
-        function showLogin() {
-            els.overlay.classList.remove('hidden');
-        }
+        /* =================== LOGIN / SIGNUP REQUEST =================== */
+        loginBtn.onclick = async () => {
+            loginError.innerText = "";
+            const email = loginEmail.value.trim();
+            const password = loginPass.value.trim();
 
-        function showApp() {
-            els.overlay.classList.add('hidden');
-            els.userDisplay.innerText = currentEmail;
-            loadConversations();
-            
-            // Start fresh
-            currentThreadId = null;
-            renderMessages([]);
-        }
+            if (!email || !password) {
+                loginError.innerText = "Fill all fields.";
+                return;
+            }
 
-        /* ============================================================
-           AUTH & API HELPERS
-        ============================================================ */
-        async function apiCall(endpoint, method = "GET", body = null) {
-            let headers = { "Content-Type": "application/json" };
-            if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+            if (isSignupMode) {
+                const password2 = loginPass2.value.trim();
+                if (password !== password2) {
+                    loginError.innerText = "Passwords do not match.";
+                    return;
+                }
 
-            let res = await fetch(API_BASE + endpoint, {
-                method,
-                headers,
-                body: body ? JSON.stringify(body) : null
+                // SIGNUP
+                const res = await fetch(API_BASE + "/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    loginError.innerText = data.message || "Signup failed.";
+                    return;
+                }
+
+                loginError.innerText = "Account created! Check your email for OTP verification.";
+                isSignupMode = false;
+                loginTitle.innerText = "Sign in";
+                loginBtn.innerText = "Login";
+                switchMode.innerText = "Don't have an account? Sign up";
+                loginPass2.style.display = "none";
+                return;
+            }
+
+            // LOGIN
+            const res = await fetch(API_BASE + "/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
             });
 
-            if (res.status === 401) {
-                if (await refreshSession()) {
-                    // Retry once with new token
-                    headers["Authorization"] = `Bearer ${accessToken}`;
-                    res = await fetch(API_BASE + endpoint, { method, headers, body: body ? JSON.stringify(body) : null });
-                } else {
-                    logout();
-                    return null;
-                }
+            const data = await res.json();
+            if (!data.success) {
+                loginError.innerText = data.message || "Login failed.";
+                return;
             }
-            return res;
-        }
 
-        async function refreshSession() {
-            if (!refreshToken) return false;
+            ACCESS_TOKEN = data.access_token;
+            REFRESH_TOKEN = data.refresh_token;
+            CURRENT_EMAIL = email;
+
+            loginPopup.style.display = "none";
+            whoEl.innerText = `Signed in as: ${CURRENT_EMAIL}`;
+            messagesContainer.innerHTML = "";
+
+            // Load summary & recent messages
+            if (data.summary) addMessage(`**Summary of previous chats:**\n${data.summary}`, "aibot");
+            if (data.recent_messages) addMessagesFromHistory(data.recent_messages);
+
+            addMessage(`Welcome back, ${CURRENT_EMAIL}!`, "aibot");
+        };
+
+        async function refreshAccessToken() {
+            if (!REFRESH_TOKEN) return false;
+
             try {
                 const res = await fetch(API_BASE + "/auth/refresh", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ refresh_token: refreshToken })
+                    body: JSON.stringify({ refresh_token: REFRESH_TOKEN })
                 });
-                if (!res.ok) throw new Error("Refresh failed");
+                if (!res.ok) return false;
                 const data = await res.json();
-                accessToken = data.access_token;
-                refreshToken = data.refresh_token;
-                localStorage.setItem("access_token", accessToken);
-                localStorage.setItem("refresh_token", refreshToken);
+                if (!data.access_token) return false;
+
+                ACCESS_TOKEN = data.access_token;
+                REFRESH_TOKEN = data.refresh_token;
+                whoEl.innerText = `Signed in as: ${CURRENT_EMAIL}`;
                 return true;
             } catch (e) {
-                console.log(e);
+                console.error("Refresh error:", e);
                 return false;
             }
         }
 
-        /* ============================================================
-           SIDEBAR & THREADS
-        ============================================================ */
-        async function loadConversations() {
-            const res = await apiCall("/conversations");
-            if (!res) return;
-            const data = await res.json();
-            renderThreads(data.conversations || []);
-        }
+        /* =================== CHATBOT =================== */
 
-        function renderThreads(threads) {
-            els.threadList.innerHTML = "";
-            threads.forEach(t => {
-                const div = document.createElement("div");
-                div.className = `thread-item ${t.id === currentThreadId ? 'active' : ''}`;
-                div.innerHTML = `
-                    <span><i class="far fa-comment-alt"></i> ${t.title || 'Untitled'}</span>
-                    <button class="delete-thread" onclick="deleteThread(event, '${t.id}')"><i class="fas fa-trash"></i></button>
-                `;
-                div.onclick = () => selectThread(t.id, t.title);
-                els.threadList.appendChild(div);
-            });
-        }
+        async function sendMessage(text) {
+            if (!ACCESS_TOKEN) return addMessage("Please login first.", "aibot");
 
-        async function selectThread(id, title) {
-            if (currentThreadId === id) return;
-            currentThreadId = id;
-            els.chatTitle.innerText = title || "Chat";
-            loadConversations(); // Re-render to update 'active' class
-            
-            // Load History
-            const res = await apiCall(`/conversations/${id}/messages`);
-            if (res) {
-                const data = await res.json();
-                renderMessages(data.messages);
-            }
-        }
+            // 1. Add User Message
+            addMessage(text, "user");
 
-        async function deleteThread(e, id) {
-            e.stopPropagation(); // Prevent clicking the thread
-            if (!confirm("Delete this chat?")) return;
-            
-            await apiCall(`/conversations/${id}`, "DELETE");
-            
-            if (currentThreadId === id) {
-                currentThreadId = null;
-                els.chatTitle.innerText = "New Chat";
-                els.msgContainer.innerHTML = '<div style="text-align:center; color:#aaa; margin-top:50px;">Chat Deleted</div>';
-            }
-            loadConversations();
-        }
-
-        els.newChatBtn.onclick = () => {
-            currentThreadId = null;
-            els.chatTitle.innerText = "New Chat";
-            els.msgContainer.innerHTML = '<div style="text-align:center; color:#aaa; margin-top:50px;"><i class="fas fa-bolt"></i><p>Start a new conversation</p></div>';
-            loadConversations(); // Remove active state
-        };
-
-        /* ============================================================
-           MESSAGING & STREAMING
-        ============================================================ */
-        function renderMessages(msgs) {
-            els.msgContainer.innerHTML = "";
-            msgs.forEach(m => appendUI(m.content, m.role === "user" ? "user" : "aibot"));
-            scrollToBottom();
-        }
-
-        function appendUI(text, role) {
-            const div = document.createElement("div");
-            div.className = `message ${role}`;
-            
-            const bubble = document.createElement("div");
-            bubble.className = "bubble";
-            bubble.innerHTML = marked.parse(text);
-            
-            div.appendChild(bubble);
-            els.msgContainer.appendChild(div);
-            scrollToBottom();
-            return bubble; // Return for streaming updates
-        }
-
-        function scrollToBottom() {
-            els.msgContainer.scrollTop = els.msgContainer.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const text = els.msgInput.value.trim();
-            if (!text) return;
-            
-            els.msgInput.value = "";
-            appendUI(text, "user");
-
-            // Create placeholder for AI
-            const aiBubble = appendUI("...", "aibot");
-            let fullResponse = "";
+            // 2. Add Empty Bot Message (Placeholder)
+            // We get the DOM element 'botBubble' back so we can fill it.
+            const botBubble = addMessage("", "aibot");
+            botBubble.innerHTML = '<span class="typing">Thinking...</span>'; // Temporary loading state
 
             try {
-                // Determine Payload (include thread_id if exists)
-                const payload = { prompt: text };
-                if (currentThreadId) payload.thread_id = currentThreadId;
-
-                const response = await fetch(API_BASE + "/chatbot", {
+                const res = await fetch(API_BASE + "/chatbot", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${accessToken}`
+                        "Authorization": "Bearer " + ACCESS_TOKEN
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ prompt: text })
                 });
 
-                if(response.status === 401) {
-                    aiBubble.innerText = "Error: Unauthorized. Please refresh.";
+                if (res.status === 401) {
+                    const refreshed = await refreshAccessToken();
+                    if (refreshed) return sendMessage(text); // Retry
+                    botBubble.innerText = "Session expired. Please login.";
+                    loginPopup.style.display = "flex";
                     return;
                 }
 
-                // STREAM READER
-                const reader = response.body.getReader();
+                // 3. Initialize Stream Reader
+                const reader = res.body.getReader();
                 const decoder = new TextDecoder();
-                let buffer = ""; // To hold partial JSON lines
+                let fullText = "";
 
+                // 4. Read the Stream
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    // Decode chunk and add to buffer
-                    buffer += decoder.decode(value, { stream: true });
+                    // Decode the chunk (bytes -> string)
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
 
-                    // Split by newline to get JSON objects
-                    let lines = buffer.split("\n");
-                    // Keep the last part in buffer (it might be incomplete)
-                    buffer = lines.pop(); 
+                    // Update UI immediately
+                    // We re-parse Markdown on every chunk to ensure formatting (bold, code blocks) renders live.
+                    botBubble.innerHTML = marked.parse(fullText);
 
-                    for (let line of lines) {
-                        if (!line.trim()) continue;
-                        try {
-                            const data = JSON.parse(line);
-                            
-                            // 1. Capture Thread ID (for new chats)
-                            if (data.thread_id && !currentThreadId) {
-                                currentThreadId = data.thread_id;
-                                loadConversations(); // Refresh sidebar to show new chat
-                            }
-
-                            // 2. Append Text Chunk
-                            if (data.chunk) {
-                                fullResponse += data.chunk;
-                                aiBubble.innerHTML = marked.parse(fullResponse);
-                                scrollToBottom();
-                            }
-                        } catch (e) {
-                            console.error("JSON Parse Error", e);
-                        }
-                    }
+                    // Auto-scroll to bottom
+                    messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
                 }
+
             } catch (err) {
-                aiBubble.innerText = "Network Error.";
+                console.error(err);
+                botBubble.innerText = "Network error or connection lost.";
             }
         }
 
-        els.sendBtn.onclick = sendMessage;
-        els.msgInput.onkeydown = (e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        };
+        messageForm.addEventListener("submit", e => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text) return;
+            messageInput.value = "";
+            sendMessage(text);
+        });
 
-        /* ============================================================
-           FILE UPLOAD & ASR (Kept from your original)
-        ============================================================ */
-        // File Upload
-        els.fileBtn.onclick = () => els.fileIn.click();
-        els.fileIn.onchange = async () => {
-             // (Implement upload logic similar to before using apiCall)
-             alert("File upload selected (Implement backend endpoint integration here)");
-        };
+        /* =================== FILE UPLOAD =================== */
+        fileBtn.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", async () => {
+            if (!ACCESS_TOKEN) return addMessage("Please login to upload files.", "aibot");
 
-        // ASR
-        let mediaRecorder;
-        let chunks = [];
-        let isRecording = false;
+            const file = fileInput.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append("file", file);
 
-        els.micBtn.onclick = async () => {
-            if (!isRecording) {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                chunks = [];
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(chunks, { type: "audio/webm" });
-                    const formData = new FormData();
-                    formData.append("file", blob, "audio.webm");
-                    
-                    els.micBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                    const res = await fetch(API_BASE + "/asr", { method:"POST", body:formData });
-                    const data = await res.json();
-                    els.msgInput.value += data.text + " ";
-                    els.micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                };
-                mediaRecorder.start();
-                els.micBtn.innerHTML = '<i class="fas fa-stop" style="color:red"></i>';
-                isRecording = true;
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-            }
-        };
-
-        /* ============================================================
-           LOGIN / SIGNUP LOGIC
-        ============================================================ */
-        els.toggleAuth.onclick = () => {
-            isSignup = !isSignup;
-            els.title.innerText = isSignup ? "Create Account" : "Welcome Back";
-            els.authBtn.innerText = isSignup ? "Sign Up" : "Sign In";
-            els.toggleAuth.innerText = isSignup ? "Have an account? Sign In" : "Need an account? Sign Up";
-        };
-
-        els.authBtn.onclick = async () => {
-            const email = els.emailIn.value;
-            const password = els.passIn.value;
-            els.err.innerText = "";
-            
-            const endpoint = isSignup ? "/signup" : "/login";
+            addMessage(`Uploading ${file.name}...`, "user");
+            showTyping();
             try {
-                const res = await fetch(API_BASE + endpoint, {
+                const res = await fetch(API_BASE + "/upload_document", {
                     method: "POST",
-                    headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({ email, password })
+                    headers: { "Authorization": "Bearer " + ACCESS_TOKEN },
+                    body: formData
                 });
                 const data = await res.json();
-                
-                if (data.success) {
-                    if (isSignup) {
-                        els.err.style.color = "green";
-                        els.err.innerText = "Success! Check email to confirm.";
-                    } else {
-                        accessToken = data.access_token;
-                        refreshToken = data.refresh_token;
-                        currentEmail = email; // Backend doesn't return email in login usually, save from input or adjust backend
-                        localStorage.setItem("access_token", accessToken);
-                        localStorage.setItem("refresh_token", refreshToken);
-                        localStorage.setItem("user_email", email);
-                        showApp();
-                    }
-                } else {
-                    els.err.style.color = "red";
-                    els.err.innerText = data.message;
-                }
-            } catch (e) {
-                els.err.innerText = "Request failed.";
+                removeTyping();
+                if (!res.ok) addMessage(data.detail || "Upload failed.", "aibot");
+                else addMessage(`Uploaded **${file.name}**\nDocument ID: ${data.doc_id}\nChunks: ${data.num_chunks}`, "aibot");
+            } catch (err) {
+                removeTyping();
+                addMessage("Upload error.", "aibot");
             }
+            fileInput.value = "";
+        });
+        //======================================================
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recording = false;
+
+        micBtn.addEventListener("click", async () => {
+            if (!recording) {
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    alert("Your browser does not support microphone recording.");
+                    return;
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                    const formData = new FormData();
+                    formData.append("file", audioBlob, "speech.webm");
+                    try {
+                        const res = await fetch(API_BASE + "/asr", { method: "POST", body: formData });
+                        const data = await res.json();
+                        const text = data.text;
+                        messageInput.value = text;
+                        await sendMessage(text);
+                    } catch (err) {
+                        console.error(err);
+                        addMessage("Error during speech recognition.", "aibot");
+                    }
+                };
+                mediaRecorder.start();
+                recording = true;
+                micBtn.innerText = "⏹️";
+            } else {
+                recording = false;
+                micBtn.innerText = "🎤";
+                mediaRecorder.stop();
+            }
+        });
+
+        /* =================== AUTO-REFRESH =================== */
+        setInterval(() => { if (ACCESS_TOKEN) refreshAccessToken(); }, 10 * 60 * 1000);
+
+        /* =================== AUTO LOGIN ON LOAD =================== */
+        window.onload = async () => {
+            const ok = await refreshAccessToken();
+            if (ok) loginPopup.style.display = "none";
+            else loginPopup.style.display = "flex";
         };
-
-        els.logoutBtn.onclick = () => logout();
-
-        async function logout() {
-            await fetch(API_BASE + "/logout", {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ refresh_token: refreshToken })
-            });
-            localStorage.clear();
-            location.reload();
-        }
-
     </script>
 </body>
+
 </html>
