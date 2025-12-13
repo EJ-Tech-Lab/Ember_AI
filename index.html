@@ -15,6 +15,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
 
         body {
             font-family: "Inter", Arial, sans-serif;
@@ -24,6 +25,17 @@
             justify-content: center;
             padding: 20px;
         }
+        /* =====================================
+   APP LAYOUT
+======================================*/
+.app-layout {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
 
         /* =====================================
        MAIN CHAT WRAPPER
@@ -224,6 +236,86 @@
             font-size: 0.9em;
             text-align: center;
         }
+        /* =====================================
+   CHAT SIDEBAR
+======================================*/
+.chat-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 14px;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    animation: fadeIn 0.6s ease both;
+}
+
+#new-chat-btn {
+    background: #7B58E5;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#new-chat-btn:hover {
+    background: #633ad9;
+}
+
+#chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 520px;
+    padding-right: 4px;
+}
+
+/* Individual chat item */
+.chat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+
+    background: rgba(123, 88, 229, 0.08);
+    transition: 0.2s;
+    font-size: 0.95em;
+}
+
+.chat-item:hover {
+    background: rgba(123, 88, 229, 0.18);
+}
+
+.chat-item.active {
+    background: rgba(123, 88, 229, 0.35);
+    font-weight: bold;
+}
+
+/* Delete button */
+.chat-item button {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.chat-item button:hover {
+    color: #000;
+}
+
     </style>
 </head>
 
@@ -243,30 +335,31 @@
         </div>
     </div>
 
-    <main>
-        <div class="chat-sidebar">
-                <button id="new-chat-btn">＋ New Chat</button>
-                <div id="chat-list"></div>
-            </div>
-        <div class="chatbot">
-            <div class="chat-header">
-                <h1>Pea 🫛</h1>
-                <div class="meta" id="who">Not signed in</div>
-                <button id="logout-btn">Logout</button>
-            </div>
+<main class="app-layout">
+    <div class="chat-sidebar">
+        <button id="new-chat-btn">＋ New Chat</button>
+        <div id="chat-list"></div>
+    </div>
 
-            <div id="chat-page">
-                <div class="chat-messages" id="messages-container"></div>
-                <form class="chat-form" id="message-form">
-                    <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
-                    <button type="button" id="file-btn">📎</button>
-                    <input type="file" id="file-input" style="display:none;" multiple />
-                    <button type="button" id="mic-btn">🎤</button>
-                    <button type="submit">➤</button>
-                </form>
-            </div>
+    <div class="chatbot">
+        <div class="chat-header">
+            <h1>Pea 🫛</h1>
+            <div class="meta" id="who">Not signed in</div>
+            <button id="logout-btn">Logout</button>
         </div>
-    </main>
+
+        <div id="chat-page">
+            <div class="chat-messages" id="messages-container"></div>
+            <form class="chat-form" id="message-form">
+                <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                <button type="button" id="file-btn">📎</button>
+                <input type="file" id="file-input" style="display:none;" multiple />
+                <button type="button" id="mic-btn">🎤</button>
+                <button type="submit">➤</button>
+            </form>
+        </div>
+    </div>
+</main>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
