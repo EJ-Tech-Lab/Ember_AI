@@ -317,104 +317,6 @@
         .chat-item button:hover {
             color: #000;
         }
-        /* =====================================
-   HEADER LAYOUT FIX
-======================================*/
-.chat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.header-center {
-    flex: 1;
-    text-align: center;
-}
-
-/* Sidebar toggle button */
-#sidebar-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.8em;
-    cursor: pointer;
-    color: #000;
-}
-
-/* =====================================
-   SIDEBAR OVERLAY (MOBILE)
-======================================*/
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 999;
-}
-
-/* =====================================
-   MOBILE RESPONSIVE
-======================================*/
-/* ==============================
-   MOBILE FIXES
-============================== */
-@media (max-width: 768px) {
-    .app-layout {
-        flex-direction: column;
-    }
-
-    /* Hide sidebar from flex flow completely */
-    .chat-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 260px;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-        border-radius: 0 20px 20px 0;
-        background: rgba(255,255,255,0.95);
-        padding: 14px;
-        box-shadow: 2px 0 20px rgba(0,0,0,0.2);
-    }
-
-    .chat-sidebar.open {
-        transform: translateX(0);
-    }
-
-    /* Overlay behind sidebar */
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.45);
-        z-index: 900;
-    }
-
-    .sidebar-overlay.show {
-        display: block;
-    }
-
-    /* Hamburger button visible */
-    #sidebar-toggle {
-        display: block;
-        background: none;
-        border: none;
-        font-size: 1.8em;
-        cursor: pointer;
-        color: #000;
-    }
-
-    /* Center header content */
-    .header-center {
-        flex: 1;
-        text-align: center;
-    }
-}
-
-        
     </style>
 </head>
 
@@ -435,36 +337,30 @@
     </div>
 
     <main class="app-layout">
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <div class="chat-sidebar">
+            <button id="new-chat-btn">＋ New Chat</button>
+            <div id="chat-list"></div>
+        </div>
 
-    <div class="chat-sidebar" id="chat-sidebar">
-        <button id="new-chat-btn">＋ New Chat</button>
-        <div id="chat-list"></div>
-    </div>
-
-    <div class="chatbot">
-        <div class="chat-header">
-            <button id="sidebar-toggle" aria-label="Open chats">☰</button>
-            <div class="header-center">
+        <div class="chatbot">
+            <div class="chat-header">
                 <h1>Pea 🫛</h1>
                 <div class="meta" id="who">Not signed in</div>
+                <button id="logout-btn">Logout</button>
             </div>
-            <button id="logout-btn">Logout</button>
-        </div>
 
-        <div id="chat-page">
-            <div class="chat-messages" id="messages-container"></div>
-            <form class="chat-form" id="message-form">
-                <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
-                <button type="button" id="file-btn">📎</button>
-                <input type="file" id="file-input" style="display:none;" multiple />
-                <button type="button" id="mic-btn">🎤</button>
-                <button type="submit">➤</button>
-            </form>
+            <div id="chat-page">
+                <div class="chat-messages" id="messages-container"></div>
+                <form class="chat-form" id="message-form">
+                    <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                    <button type="button" id="file-btn">📎</button>
+                    <input type="file" id="file-input" style="display:none;" multiple />
+                    <button type="button" id="mic-btn">🎤</button>
+                    <button type="submit">➤</button>
+                </form>
+            </div>
         </div>
-    </div>
-</main>
-
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
@@ -491,11 +387,7 @@
         const fileInput = document.getElementById("file-input");
         const chatList = document.getElementById("chat-list");
         const newChatBtn = document.getElementById("new-chat-btn");
-const sidebar = document.getElementById("chat-sidebar");
-    const overlay = document.getElementById("sidebar-overlay");
-    const toggleBtn = document.getElementById("sidebar-toggle");
 
-        
         let ACCESS_TOKEN = null;
         let REFRESH_TOKEN = null;
         let CURRENT_EMAIL = null;
@@ -867,23 +759,6 @@ const sidebar = document.getElementById("chat-sidebar");
             if (ok) loginPopup.style.display = "none";
             else loginPopup.style.display = "flex";
         };
-toggleBtn.addEventListener("click", () => {
-        sidebar.classList.add("open");
-        overlay.classList.add("show");
-    });
-
-    overlay.addEventListener("click", () => {
-        sidebar.classList.remove("open");
-        overlay.classList.remove("show");
-    });
-
-    // Close sidebar automatically when a chat is clicked (mobile UX)
-    document.getElementById("chat-list").addEventListener("click", () => {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove("open");
-            overlay.classList.remove("show");
-        }
-    });
     </script>
 </body>
 
