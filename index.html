@@ -630,6 +630,10 @@
             chats.forEach(c => {
                 const item = document.createElement("div");
                 item.className = "chat-item";
+                if (c.id === CURRENT_CHAT_ID) {
+                    item.classList.add("active"); // Ensure you have CSS for .chat-item.active
+                    item.style.backgroundColor = "#e0e7ff"; // Fallback styling
+                }
                 item.innerText = c.title || "Chat";
                 item.onclick = () => selectChat(c.id);
 
@@ -644,7 +648,9 @@
                 chatList.appendChild(item);
             });
 
-            selectChat(chats[0].id);
+            if (!CURRENT_CHAT_ID && chats.length > 0) {
+                selectChat(chats[0].id);
+            }
         }
 
         async function createChat() {
@@ -758,7 +764,7 @@
                     // Auto-scroll to bottom
                     messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
                 }
-
+await loadChats();
             } catch (err) {
                 console.error(err);
                 botBubble.innerText = "Network error or connection lost.";
