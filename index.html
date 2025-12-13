@@ -315,6 +315,78 @@
 .chat-item button:hover {
     color: #000;
 }
+        /* =====================================
+   SIDEBAR TOGGLE BUTTON
+======================================*/
+#sidebar-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 1.6em;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+/* =====================================
+   SIDEBAR OVERLAY (MOBILE)
+======================================*/
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+}
+
+/* =====================================
+   MOBILE SIDEBAR BEHAVIOR
+======================================*/
+@media (max-width: 900px) {
+
+    body {
+        padding: 0;
+    }
+
+    .app-layout {
+        max-width: 100%;
+        gap: 0;
+    }
+
+    #sidebar-toggle {
+        display: inline-block;
+    }
+
+    .chat-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 260px;
+        z-index: 1100;
+
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        border-radius: 0 20px 20px 0;
+    }
+
+    .chat-sidebar.open {
+        transform: translateX(0);
+    }
+
+    #sidebar-overlay.active {
+        display: block;
+    }
+
+    .chatbot {
+        border-radius: 0;
+        height: 100vh;
+    }
+
+    .chat-messages {
+        height: calc(100vh - 170px);
+    }
+}
+
 
     </style>
 </head>
@@ -336,6 +408,8 @@
     </div>
 
 <main class="app-layout">
+    <div id="sidebar-overlay"></div>
+
     <div class="chat-sidebar">
         <button id="new-chat-btn">＋ New Chat</button>
         <div id="chat-list"></div>
@@ -343,6 +417,8 @@
 
     <div class="chatbot">
         <div class="chat-header">
+            <button id="sidebar-toggle" aria-label="Open chats">☰</button>
+
             <h1>Pea 🫛</h1>
             <div class="meta" id="who">Not signed in</div>
             <button id="logout-btn">Logout</button>
@@ -386,6 +462,10 @@
         const fileInput = document.getElementById("file-input");
 const chatList = document.getElementById("chat-list");
 const newChatBtn = document.getElementById("new-chat-btn");
+            const sidebar = document.querySelector('.chat-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+
         
         let ACCESS_TOKEN = null;
         let REFRESH_TOKEN = null;
@@ -758,6 +838,19 @@ newChatBtn.onclick = createChat;
             if (ok) loginPopup.style.display = "none";
             else loginPopup.style.display = "flex";
         };
+        toggleBtn.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+        document.getElementById('chat-list').addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+});
     </script>
 </body>
 
