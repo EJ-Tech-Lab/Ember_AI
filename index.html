@@ -86,6 +86,26 @@
             font-size: .9em;
             opacity: .9;
         }
+        .chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.header-center {
+    text-align: center;
+    flex: 1;
+}
+
+#sidebar-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 1.6em;
+    cursor: pointer;
+}
+
 
         /* =====================================
        CHAT AREA
@@ -317,6 +337,51 @@
         .chat-item button:hover {
             color: #000;
         }
+        /* =====================================
+   SIDEBAR OVERLAY (MOBILE)
+======================================*/
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1500;
+
+    display: none;
+    justify-content: flex-start;
+}
+
+.sidebar-overlay.active {
+    display: flex;
+}
+/* =====================================
+   MOBILE FIX
+======================================*/
+@media (max-width: 900px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .app-layout {
+        flex-direction: column;
+    }
+
+    .chatbot {
+        max-width: 100%;
+    }
+
+    /* Sidebar hidden by default */
+    .chat-sidebar {
+        height: 100%;
+        width: 260px;
+        border-radius: 0 20px 20px 0;
+    }
+
+    #sidebar-toggle {
+        display: block;
+    }
+}
+
     </style>
 </head>
 
@@ -337,17 +402,26 @@
     </div>
 
     <main class="app-layout">
-        <div class="chat-sidebar">
-            <button id="new-chat-btn">＋ New Chat</button>
-            <div id="chat-list"></div>
-        </div>
+        <div class="sidebar-overlay" id="sidebar-overlay">
+    <div class="chat-sidebar" id="chat-sidebar">
+        <button id="new-chat-btn">＋ New Chat</button>
+        <div id="chat-list"></div>
+    </div>
+</div>
+
 
         <div class="chatbot">
             <div class="chat-header">
-                <h1>Pea 🫛</h1>
-                <div class="meta" id="who">Not signed in</div>
-                <button id="logout-btn">Logout</button>
-            </div>
+    <button id="sidebar-toggle">☰</button>
+
+    <div class="header-center">
+        <h1>Pea 🫛</h1>
+        <div class="meta" id="who">Not signed in</div>
+    </div>
+
+    <button id="logout-btn">Logout</button>
+</div>
+
 
             <div id="chat-page">
                 <div class="chat-messages" id="messages-container"></div>
@@ -759,6 +833,18 @@
             if (ok) loginPopup.style.display = "none";
             else loginPopup.style.display = "flex";
         };
+        const sidebarToggle = document.getElementById("sidebar-toggle");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+    sidebarToggle.addEventListener("click", () => {
+        sidebarOverlay.classList.toggle("active");
+    });
+
+    sidebarOverlay.addEventListener("click", (e) => {
+        if (e.target === sidebarOverlay) {
+            sidebarOverlay.classList.remove("active");
+        }
+    });
     </script>
 </body>
 
