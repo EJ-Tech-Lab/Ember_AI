@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pea Chat</title>
-
+    <link rel="icon" type="image/png" sizes="32x32" href="myicon.png">
     <style>
         /* =====================================
        GLOBAL / RESET
@@ -19,7 +19,8 @@
 
         body {
             font-family: "Inter", Arial, sans-serif;
-            background: linear-gradient(135deg, #000000, #555454);
+            background: #D8C3A5;
+            ;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -47,7 +48,7 @@
             display: flex;
             flex-direction: column;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            background: #FFF5E6;
             backdrop-filter: blur(12px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
@@ -71,9 +72,9 @@
     ======================================*/
         .chat-header {
             padding: 1.3em;
-            background: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(120deg, #FFF5E6 0%, #FF9F80 60%);
             backdrop-filter: blur(6px);
-            color: rgb(0, 0, 0);
+            color: #333333;
             text-align: center;
             font-weight: bold;
         }
@@ -85,17 +86,6 @@
         .meta {
             font-size: .9em;
             opacity: .9;
-        }
-
-        .chat-header button {
-            background-color: rgb(0, 0, 0);
-            color: #fff;
-            border: none;
-            padding: 0 18px;
-            border-radius: 18px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 1.1em;
         }
 
         /* =====================================
@@ -119,8 +109,8 @@
         }
 
         .user p {
-            background-color: rgb(0, 0, 0);
-            color: #fff;
+            background-color: #FF9F80;
+            color: #333333;
             padding: 0.6em 1em;
             border-radius: 18px 18px 0 18px;
             max-width: 85%;
@@ -129,8 +119,8 @@
         }
 
         .aibot p {
-            background-color: #ececec;
-            color: #000;
+            background-color: #FFF5E6;
+            color: #333333;
             padding: 0.6em 1em;
             border-radius: 18px 18px 18px 0;
             max-width: 85%;
@@ -169,7 +159,7 @@
             padding: 1em;
             border-top: 1px solid #ddd;
             gap: 0.5em;
-            background: #fafafa;
+            background: #FFF5E6;
         }
 
         .chat-form textarea {
@@ -184,8 +174,8 @@
         }
 
         .chat-form button {
-            background-color: rgb(0, 0, 0);
-            color: #fff;
+            background-color: #FF9F80;
+            color: #333333;
             border: none;
             padding: 0 18px;
             border-radius: 18px;
@@ -195,7 +185,7 @@
         }
 
         .chat-form button:hover {
-            background-color: #3c3c3c;
+            background-color: #FFC15E;
         }
 
         /* =====================================
@@ -212,7 +202,7 @@
         }
 
         #login-card {
-            background: white;
+            background: #FFF5E6;
             padding: 25px;
             border-radius: 12px;
             width: 320px;
@@ -232,8 +222,8 @@
             width: 100%;
             padding: 12px;
             margin-top: 16px;
-            background: #000000;
-            color: white;
+            background: #FF9F80;
+            color: #333333;
             border: none;
             border-radius: 10px;
             font-size: 1.05em;
@@ -242,7 +232,7 @@
 
         #switch-mode {
             margin-top: 10px;
-            color: #000000;
+            color: #FFC15E;
             text-decoration: underline;
             cursor: pointer;
             font-size: 0.9em;
@@ -259,7 +249,7 @@
             flex-direction: column;
             gap: 12px;
 
-            background: rgba(255, 255, 255, 0.85);
+            background: #FFF5E6;
             backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 14px;
@@ -269,8 +259,8 @@
         }
 
         #new-chat-btn {
-            background: #000000;
-            color: white;
+            background: #FF9F80;
+            color: #333333;
             border: none;
             padding: 12px;
             border-radius: 14px;
@@ -280,7 +270,7 @@
         }
 
         #new-chat-btn:hover {
-            background: #4f4f50;
+            background: #FFC15E;
         }
 
         #chat-list {
@@ -422,7 +412,7 @@
             <input id="login-pass2" type="password" placeholder="Confirm password" style="display:none;" />
 
             <button id="login-btn">Login</button>
-            <p id="login-error" style="color:rgb(60, 60, 60)"></p>
+            <p id="login-error" style="color:red"></p>
             <div id="switch-mode">Don't have an account? Sign up</div>
         </div>
     </div>
@@ -441,12 +431,11 @@
                 <button id="sidebar-toggle">☰</button>
 
                 <div class="header-center">
-                    <h1>Ruin AI</h1>
-
+                    <h1>Ember</h1>
                     <div class="meta" id="who">Not signed in</div>
                 </div>
 
-                <button type="button" id="logout-btn">Logout</button>
+                <button id="logout-btn">Logout</button>
             </div>
 
 
