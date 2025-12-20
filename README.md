@@ -5,7 +5,7 @@ It integrates real-time LLM streaming, persistent memory, Retrieval-Augmented Ge
 
 The project emphasizes **clear separation of concerns**, **backend-driven intelligence**, and a **thin, deterministic frontend**.
 
----
+
 
 ## System Overview
 
@@ -16,11 +16,11 @@ Ember AI consists of two primary layers:
 
 All conversational logic, memory, and reasoning reside exclusively on the backend.
 
----
+
 
 The frontend acts as a **transparent interface** to backend capabilities, avoiding duplicated logic or hidden state.
 
----
+
 
 ## Backend
 
@@ -39,7 +39,7 @@ The backend is responsible for:
 
 The backend is the **single source of truth** for all application state.
 
----
+
 
 ### Technology Stack (Backend)
 
@@ -51,7 +51,7 @@ The backend is the **single source of truth** for all application state.
 - **Supabase** — authentication and user management
 - **SQL Database** — chat and message persistence
 
----
+
 
 ### Chat & Memory Model
 
@@ -63,7 +63,7 @@ The backend is the **single source of truth** for all application state.
 
 This guarantees deterministic behavior even across reloads or devices.
 
----
+
 
 ### Streaming Response Design
 
@@ -76,7 +76,7 @@ LLM responses are streamed token-by-token from the backend:
 
 This design improves perceived performance and user experience.
 
----
+
 
 ### Retrieval-Augmented Generation (RAG)
 
@@ -91,7 +91,7 @@ Document ingestion follows a controlled backend pipeline:
 
 Documents are scoped per chat, preventing cross-conversation leakage.
 
----
+
 
 ### Voice Input (ASR)
 
@@ -100,7 +100,7 @@ Documents are scoped per chat, preventing cross-conversation leakage.
 - Resulting text enters the same chat pipeline as typed input
 - No special-case logic exists for voice vs text
 
----
+
 
 ### Security & Authentication
 
@@ -109,7 +109,7 @@ Documents are scoped per chat, preventing cross-conversation leakage.
 - Unauthorized access returns immediate rejection
 - Backend never trusts client-supplied state beyond identifiers
 
----
+
 
 ## Frontend
 
@@ -124,7 +124,7 @@ The frontend is a **framework-free, vanilla JavaScript web client** designed for
 
 The frontend intentionally avoids complex state management frameworks.
 
----
+
 
 ### Frontend Responsibilities
 
@@ -141,7 +141,7 @@ The frontend handles:
 
 It does **not** perform reasoning, memory handling, or prompt logic.
 
----
+
 
 ### Technology Stack (Frontend)
 
@@ -152,7 +152,7 @@ It does **not** perform reasoning, memory handling, or prompt logic.
 - **MediaRecorder API** (voice input)
 - **Markdown Renderer**
 
----
+
 
 ### Authentication Flow
 
@@ -163,7 +163,7 @@ It does **not** perform reasoning, memory handling, or prompt logic.
 
 This ensures session continuity without compromising security.
 
----
+
 
 ### Chat Lifecycle
 
@@ -175,7 +175,7 @@ This ensures session continuity without compromising security.
 
 The frontend never reconstructs chat state locally.
 
----
+
 
 ### Streaming Handling
 
@@ -186,7 +186,7 @@ The frontend never reconstructs chat state locally.
 
 This enables a smooth, real-time conversational experience.
 
----
+
 
 ### UI Design Philosophy
 
@@ -200,7 +200,7 @@ The UI follows these principles:
 
 The frontend exists to **reflect**, not reinterpret, backend behavior.
 
----
+
 
 ## Deployment
 
@@ -209,7 +209,7 @@ The frontend exists to **reflect**, not reinterpret, backend behavior.
 - Communication occurs exclusively over HTTPS
 - CORS is explicitly configured on the backend
 
----
+
 
 ## Why This Project Matters
 
